@@ -1,2 +1,2 @@
 startup
-build --cxxopt='-std=c++2a'
+build --cxxopt='-std=c++17'
