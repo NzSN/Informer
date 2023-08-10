@@ -12,6 +12,7 @@ class Reporter {
 public:
   Reporter(std::string identifier):
     identifier_(identifier) {}
+  virtual ~Reporter() = default;
 
   // Leave the way how report datas are generated and
   // how transfer such datas to implementation of Reporter.
