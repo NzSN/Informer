@@ -5,60 +5,60 @@
 #include <optional>
 #include <functional>
 
-class Receiver;
-class Reporter;
+#include <iostream>
+#include "reporter.h"
+#include "receiver.h"
 
 namespace Informer {
 struct ReporterForTest: public Reporter {
-  ReporterForTest(std::string identifierArg,
+  ReporterForTest(std::string identifier,
                   std::function<std::optional<std::string>()> handle):
-    identifier(identifierArg), reportHandle(handle) {}
+    Reporter(identifier), reportHandle(handle) {}
 
-  std::optional<std::string> report() const {
+  std::optional<std::string> report() override {
     return reportHandle();
   };
 
-  std::string identifier;
   std::function<std::optional<std::string>()> reportHandle;
 };
 
 struct SingleProcTest: public ::testing::Test {
   void SetUp() override {
     informer = std::make_unique<Receiver>();
-    reporters.emplace_back("ident1", [](const Reporter& s) {
-      return "information from ident1";
-    });
-    reporters.emplace_back("ident2", [](const Reporter& s) {
-      return "information from ident2";
-    });
 
-    informer->register("ident1", reporters[0].get());
-    informer->register("ident2", reporters[1].get());
+    numOfReports = *rc::gen::inRange(1, 100);
+    for (int i = 0; i < numOfReports; ++i) {
+      std::string ident = *rc::gen::arbitrary<std::string>();
+      idents.push_back(ident);
+
+      std::unique_ptr<Reporter> r = std::make_unique<ReporterForTest>(ident, [=]() {
+        return ident;
+      });
+      informer->addReporter(std::move(r));
+    }
   }
 
+  int numOfReports;
+  std::vector<std::string> idents;
   std::unique_ptr<Receiver> informer;
-  using Reporters = std::vector<std::unique_ptr<Reporter>>;
-  Reporters reporters;
 };
 
 RC_GTEST_FIXTURE_PROP(SingleProcTest, Basics, ()) {
   // Retrieve from a single reporter
-  std::string info = informer->retrieve("ident1");
-  info = informer->retrieve("ident2");
-
-  std::vector<std::string> informer->retrieves();
-}
-
-#ifdef __linux__
-struct MultiProcTest: public ::testing::Test {
-  void SetUp() override {
-    informer = std::make_unique<Receiver>();
+  for (int i = 0; i < numOfReports; ++i) {
+    std::optional<Receiver::Report> report = informer->retrieve(idents[i]);
+    RC_ASSERT(report.has_value());
+    RC_ASSERT(report.value() == idents[i]);
   }
 
-  std::unique_ptr<Receiver> informer;
-  using Reporters = std::vector<std::unique_ptr<Reporter>>;
-  Reporters reporters;
-};
-#endif // __linux__
+  std::optional<Receiver::Reports> reports = informer->retrieveAll();
+  RC_ASSERT(reports.has_value());
+  for (int i = 0; i < numOfReports; ++i) {
+    auto iter = reports.value().find(idents[i]);
+    bool isFound = iter != std::end(reports.value());
+    RC_ASSERT(isFound);
+    RC_ASSERT(iter->second == idents[i]);
+  }
+}
 
 } // Informer

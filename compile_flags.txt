@@ -1,2 +1,5 @@
+-std=c++17
 -xc++
 -Isrc
+-Ibazel-bin/external/rapidcheck/rapidcheck/include
+-Iide_env/googletest-5ab508a01f9eb089207ee87fd547d290da39d015/googletest/include

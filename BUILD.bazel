@@ -1,0 +1,8 @@
+
+cc_test(
+    name = "informer_tests",
+    srcs = ["//src:informer_test_srcs"],
+    deps = [
+         "@com_google_googletest//:gtest_main",
+         "@rapidcheck//:rapidcheck"]
+)
