@@ -1,0 +1,11 @@
+
+source_set("informer_sources") {
+  sources = [
+    "src/receiver.cc",
+    "src/receiver.h",
+    "src/reporter.h"]
+}
+
+component("libinformer") {
+  deps = [":informer_sources"]
+}
