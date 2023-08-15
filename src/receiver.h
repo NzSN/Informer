@@ -2,6 +2,7 @@
 #ifndef RECEIVER_H
 #define RECEIVER_H
 
+#include <utility>
 #include <string>
 #include <memory>
 #include <map>
@@ -21,11 +22,14 @@ public:
 
   using Report = std::string;
   using Reports = std::map<std::string, std::string>;
+  using ReportsWithFailedCases =
+    std::tuple<Reports, std::vector<std::string>>;
 
   STATE addReporter(std::unique_ptr<Reporter>&& reporter);
 
   std::optional<Report> retrieve(std::string reporterID) const;
-  std::optional<Reports> retrieveAll() const;
+
+  ReportsWithFailedCases retrieveAll() const;
 private:
   std::map<std::string, std::unique_ptr<Reporter>> reporters;
 };

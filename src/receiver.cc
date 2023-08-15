@@ -27,12 +27,13 @@ Receiver::retrieve(std::string reporterID) const {
   return iter->second->report();
 }
 
-std::optional<Receiver::Reports>
+Receiver::ReportsWithFailedCases
 Receiver::retrieveAll() const {
   Reports reports;
+  std::vector<std::string> fails;
 
   if (reporters.empty()) {
-    return std::nullopt;
+    return {{}, {}};
   }
 
   std::for_each(
@@ -41,11 +42,14 @@ Receiver::retrieveAll() const {
        const& p) {
 
       const auto& report = std::get<1>(p)->report();
-      reports.emplace(std::get<0>(p),
-                      report.has_value() ? report.value() : "" );
+      if (report.has_value()) {
+        reports.emplace(std::get<0>(p), report.value());
+      } else {
+        fails.push_back(std::get<0>(p));
+      }
     });
 
-  return reports;
+  return std::make_tuple(reports, fails);
 }
 
 } // Informer
