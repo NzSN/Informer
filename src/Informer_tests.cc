@@ -37,7 +37,7 @@ struct SingleProcTest: public ::testing::Test {
   void SetUp() override {
     informer = std::make_unique<Receiver>();
 
-    numOfReports = *rc::gen::inRange(1, 100);
+    numOfReports = *rc::gen::inRange(0, 100);
     for (int i = 0; i < numOfReports; ++i) {
       std::string ident = *rc::gen::arbitrary<std::string>();
       idents.push_back(ident);
@@ -57,7 +57,7 @@ struct SingleProcTest: public ::testing::Test {
   std::unique_ptr<Receiver> informer;
 };
 
-RC_GTEST_FIXTURE_PROP(SingleProcTest, Basics, ()) {
+RC_GTEST_FIXTURE_PROP(SingleProcTest, SingleReport, ()) {
   // Retrieve from a single reporter
   for (int i = 0; i < numOfReports; ++i) {
     std::optional<Receiver::Report> report = informer->retrieve(idents[i]);
@@ -65,7 +65,9 @@ RC_GTEST_FIXTURE_PROP(SingleProcTest, Basics, ()) {
       RC_ASSERT(report.value() == idents[i]);
     }
   }
+}
 
+RC_GTEST_FIXTURE_PROP(SingleProcTest, MultiReport, ()) {
   // In this case, all reporter success to report information.
   Receiver::ReportsWithFailedCases
     reports = informer->retrieveAll();
