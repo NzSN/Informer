@@ -8,6 +8,7 @@
 
 namespace Informer {
 
+template<typename T>
 class Reporter {
 public:
   Reporter(std::string identifier):
@@ -16,7 +17,7 @@ public:
 
   // Leave the way how report datas are generated and
   // how transfer such datas to implementation of Reporter.
-  virtual std::optional<std::string> report() = 0;
+  virtual std::optional<T> report() = 0;
   std::string identifier() const {
     return identifier_;
   }

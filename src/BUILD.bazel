@@ -1,12 +1,12 @@
 
 filegroup(
     name = "informer_srcs",
-    srcs = ["reporter.h", "receiver.h", "receiver.cc"],
+    srcs = ["reporter.h", "receiver.h", "receiver-inl.h"],
     visibility = ["//visibility:public"],
 )
 
 filegroup(
     name = "informer_test_srcs",
-    srcs = ["reporter.h", "receiver.h", "receiver.cc", "Informer_tests.cc"],
+    srcs = ["reporter.h", "receiver.h", "receiver-inl.h", "Informer_tests.cc"],
     visibility = ["//visibility:public"],
 )

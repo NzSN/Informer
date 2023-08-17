@@ -8,10 +8,10 @@
 #include <iostream>
 #include <array>
 #include "reporter.h"
-#include "receiver.h"
+#include "receiver-inl.h"
 
 namespace Informer {
-struct ReporterForTest: public Reporter {
+struct ReporterForTest: public Reporter<std::string> {
   ReporterForTest(std::string identifier,
                   std::function<std::optional<std::string>()> handle):
     Reporter(identifier), reportHandle(handle) {}
@@ -35,14 +35,15 @@ struct ReporterForTestFailed: public ReporterForTest {
 
 struct SingleProcTest: public ::testing::Test {
   void SetUp() override {
-    informer = std::make_unique<Receiver>();
+    informer = std::make_unique<Receiver<std::string>>();
 
     numOfReports = *rc::gen::inRange(0, 100);
     for (int i = 0; i < numOfReports; ++i) {
       std::string ident = *rc::gen::arbitrary<std::string>();
       idents.push_back(ident);
 
-      std::unique_ptr<Reporter> r = std::make_unique<ReporterForTest>(
+      std::unique_ptr<Reporter<std::string>> r =
+        std::make_unique<ReporterForTest>(
         ident,
         [=]() -> std::optional<std::string> {
         return *rc::gen::arbitrary<bool>() ?
@@ -54,13 +55,13 @@ struct SingleProcTest: public ::testing::Test {
 
   int numOfReports;
   std::vector<std::string> idents;
-  std::unique_ptr<Receiver> informer;
+  std::unique_ptr<Receiver<std::string>> informer;
 };
 
 RC_GTEST_FIXTURE_PROP(SingleProcTest, SingleReport, ()) {
   // Retrieve from a single reporter
   for (int i = 0; i < numOfReports; ++i) {
-    std::optional<Receiver::Report> report = informer->retrieve(idents[i]);
+    std::optional<Receiver<std::string>::Report> report = informer->retrieve(idents[i]);
     if (report.has_value()) {
       RC_ASSERT(report.value() == idents[i]);
     }
@@ -69,7 +70,7 @@ RC_GTEST_FIXTURE_PROP(SingleProcTest, SingleReport, ()) {
 
 RC_GTEST_FIXTURE_PROP(SingleProcTest, MultiReport, ()) {
   // In this case, all reporter success to report information.
-  Receiver::ReportsWithFailedCases
+  Receiver<std::string>::ReportsWithFailedCases
     reports = informer->retrieveAll();
   for (auto& i: idents) {
     auto iter = std::get<0>(reports).find(i);
