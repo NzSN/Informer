@@ -1,7 +1,7 @@
 
 source_set("informer_sources") {
   sources = [
-    "src/receiver.cc",
+    "src/receiver-inl.h",
     "src/receiver.h",
     "src/reporter.h"]
 }
