@@ -24,7 +24,7 @@ public:
   using Report = T;
   using Reports = std::map<std::string, T>;
   using ReportsWithFailedCases =
-    std::tuple<Reports, std::vector<T>>;
+    std::tuple<Reports, std::vector<std::string>>;
 
   STATE addReporter(std::unique_ptr<Reporter<T>>&& reporter);
 
